@@ -26,6 +26,7 @@
     device = "nodev";
     efiSupport = true;
     useOSProber = true;
+    fontSize = 32;
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
@@ -137,6 +138,11 @@
     clash-verge-rev
     gh
     efibootmgr
+    python3
+    fastfetch
+    htop
+    btop
+    vscode
   ];
 
   environment.sessionVariables = {
