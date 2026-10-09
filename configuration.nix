@@ -31,8 +31,8 @@
 
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # 使用 CachyOS 内核（由 flake 输入 chaotic 提供）
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   networking.hostName = "kitra-laptop-nix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -95,6 +95,33 @@
 
   # 整套 KDE PIM（KMail、Kontact、Merkuro、Akonadi）由 PIM 模块提供，而非 Plasma 模块
   programs.kde-pim.enable = false;
+
+  # NVIDIA 专有驱动（用户态闭源 + 开源内核模块），安装后自动屏蔽 nouveau
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia = {
+    # 用 chaotic-nyx 配套的驱动（与 CachyOS 内核匹配且有二进制缓存）。
+    # nixpkgs 自带的驱动在该内核上本地编译会因缺少模块签名密钥而失败。
+    package = pkgs.nvidia_cachyos;
+    open = true;                        # 使用 NVIDIA 开源内核模块
+    modesetting.enable = true;
+    powerManagement.enable = true;
+    powerManagement.finegrained = true; # 空闲时给独显断电省电
+    prime = {
+      offload.enable = true;            # 核显渲染，按需调用独显
+      offload.enableOffloadCmd = true;  # 生成 nvidia-offload 命令
+      amdgpuBusId = "PCI:102:0:0";      # 核显 0000:66:00.0，注意为十进制
+      nvidiaBusId = "PCI:1:0:0";        # 独显 0000:01:00.0
+    };
+  };
+
+  # ASUS 笔记本守护进程：模块会安装 asusctl/supergfxctl 并注册、启动对应服务
+  services.asusd.enable = true;
+  services.supergfxd.enable = true;
+  # asusd 上游 unit 无 [Install] 段，模块也未声明 wantedBy，需显式随 multi-user.target 启动
+  systemd.services.asusd.wantedBy = [ "multi-user.target" ];
+
+  # ROG Control Center 图形界面（内置 asusctl 包中）
+  programs.rog-control-center.enable = true;
 
   # Configure keymap in X11
   services.xserver.xkb = {
