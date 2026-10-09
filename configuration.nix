@@ -18,8 +18,16 @@
     # "https://cache.nixos.org/" # 保留官方源作为备选
   ];
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.enable = false;
+  
+  # Use GRUB
+  boot.loader.grub = {
+    enable = true;
+    device = "nodev";
+    efiSupport = true;
+    useOSProber = true;
+  };
+
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Use latest kernel.
@@ -128,6 +136,7 @@
     git
     clash-verge-rev
     gh
+    efibootmgr
   ];
 
   environment.sessionVariables = {
