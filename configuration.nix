@@ -129,6 +129,11 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # 安装 Sarasa Term SC Nerd 字体（Nixpkgs 未收录，自定义 derivation）
+  fonts.packages = [
+    (pkgs.callPackage ./sarasa-term-sc-nerd.nix { })
+  ];
+
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
