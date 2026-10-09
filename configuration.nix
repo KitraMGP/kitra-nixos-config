@@ -147,10 +147,14 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
 
+  # zsh 作为登录 shell（同时注册进 /etc/shells）
+  programs.zsh.enable = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."kitra" = {
     isNormalUser = true;
     description = "Kitra";
+    shell = pkgs.zsh;
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
       kdePackages.kate
