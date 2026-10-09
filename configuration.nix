@@ -156,6 +156,9 @@
     htop
     btop
     vscode
+    vlc
+    qq
+    wechat
   ];
 
   environment.sessionVariables = {
