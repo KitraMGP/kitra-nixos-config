@@ -123,6 +123,15 @@
   # ROG Control Center 图形界面（内置 asusctl 包中）
   programs.rog-control-center.enable = true;
 
+  # Podman 容器（https://wiki.nixos.org/wiki/Podman）
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;                        # 提供 docker -> podman 命令
+    defaultNetwork.settings.dns_enabled = true; # podman-compose 容器间可用服务名互访
+  };
+  # 未限定镜像名（如 nginx）默认从 docker.io 拉取
+  virtualisation.containers.registries.settings.unqualified-search-registries = [ "docker.io" ];
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -155,7 +164,7 @@
     isNormalUser = true;
     description = "Kitra";
     shell = pkgs.zsh;
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "podman" ];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
@@ -186,6 +195,7 @@
     fastfetch
     htop
     btop
+    podman-compose
     vscode
     vlc
     qq
