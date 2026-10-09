@@ -88,6 +88,14 @@
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
+  # 排除 Plasma 6 自带的不需要的应用程序
+  environment.plasma6.excludePackages = with pkgs.kdePackages; [
+    elisa
+  ];
+
+  # 整套 KDE PIM（KMail、Kontact、Merkuro、Akonadi）由 PIM 模块提供，而非 Plasma 模块
+  programs.kde-pim.enable = false;
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
