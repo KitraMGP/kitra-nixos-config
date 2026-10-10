@@ -172,6 +172,10 @@
   # 设置默认 registry 为 docker.io
   virtualisation.containers.registries.settings.unqualified-search-registries = [ "docker.io" ];
 
+  # VirtualBox 主机（本机用来运行虚拟机）
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "kitra" ];
+
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";
@@ -309,6 +313,7 @@
     wechat
     # WPS Office 中国版（含 WPS 文字/表格/演示/PDF），unfree，依赖全局 allowUnfree
     wpsoffice-cn
+    wemeet
   ];
 
   environment.sessionVariables = {
