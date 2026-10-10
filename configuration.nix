@@ -177,10 +177,62 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # 安装 Sarasa Term SC Nerd 字体（Nixpkgs 未收录，自定义 derivation）
-  fonts.packages = [
-    (pkgs.callPackage ./sarasa-term-sc-nerd.nix { })
-  ];
+  # 字体：MiSans 为默认字体，Sarasa Term SC Nerd 为默认等宽字体
+  # 两者 Nixpkgs 未收录，均为自定义 derivation（fetchurl 固定 hash，可复现）
+  fonts = {
+    packages = with pkgs; [
+      (callPackage ./misans.nix { })
+      (callPackage ./sarasa-term-sc-nerd.nix { })
+      noto-fonts # 拉丁字母后备
+      noto-fonts-cjk-sans # 汉字缺字时后备
+      noto-fonts-color-emoji # emoji
+    ];
+
+    # 清晰显示：抗锯齿 + slight hinting + RGB 亚像素渲染
+    fontconfig = {
+      enable = true;
+      antialias = true;
+      hinting.enable = true;
+      hinting.style = "slight";
+      subpixel.rgba = "rgb";
+      subpixel.lcdfilter = "default";
+
+      # mkForce：Plasma6 模块会注入 Hack/Noto Sans Mono 等默认值并与本列表合并，
+      # 导致 Sarasa 平局后排序垫底
+      defaultFonts = {
+        sansSerif = pkgs.lib.mkForce [ "MiSans" "Noto Sans CJK SC" "Noto Sans" ];
+        serif = pkgs.lib.mkForce [ "MiSans" "Noto Serif" ];
+        monospace = pkgs.lib.mkForce [ "Sarasa Term SC Nerd" ];
+        emoji = pkgs.lib.mkForce [ "Noto Color Emoji" ];
+      };
+
+      localConf = ''
+        <?xml version="1.0"?>
+        <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+        <fontconfig>
+          <!-- 统一简体中文字形：zh 请求按 zh-CN 匹配（避免日文/繁体字形） -->
+          <match target="pattern">
+            <test name="lang" compare="contains">
+              <string>zh</string>
+            </test>
+            <edit name="lang" mode="assign">
+              <string>zh-CN</string>
+            </edit>
+          </match>
+
+          <!-- Plasma/应用硬编码请求 Noto Sans 时也改用 MiSans，缺字自动回落 -->
+          <match target="pattern">
+            <test name="family">
+              <string>Noto Sans</string>
+            </test>
+            <edit name="family" mode="prepend" binding="strong">
+              <string>MiSans</string>
+            </edit>
+          </match>
+        </fontconfig>
+      '';
+    };
+  };
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
