@@ -26,10 +26,17 @@
     device = "nodev";
     efiSupport = true;
     useOSProber = true;
+    # 不设置 font 会导致 fontSize 不生效
+    font = "${pkgs.unifont}/share/fonts/opentype/unifont/unifont.otf";
     fontSize = 32;
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # GRUB 界面语言设为简体中文
+  boot.loader.grub.extraConfig = ''
+    set lang=zh_CN
+  '';
 
   # 使用 CachyOS 内核（由 flake 输入 chaotic 提供）
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
@@ -126,7 +133,7 @@
     elisa
   ];
 
-  # 整套 KDE PIM（KMail、Kontact、Merkuro、Akonadi）由 PIM 模块提供，而非 Plasma 模块
+  # 排除整套 KDE PIM（KMail、Kontact、Merkuro、Akonadi）
   programs.kde-pim.enable = false;
 
   # NVIDIA 专有驱动（用户态闭源 + 开源内核模块），安装后自动屏蔽 nouveau
@@ -162,7 +169,7 @@
     dockerCompat = true;                        # 提供 docker -> podman 命令
     defaultNetwork.settings.dns_enabled = true; # podman-compose 容器间可用服务名互访
   };
-  # 未限定镜像名（如 nginx）默认从 docker.io 拉取
+  # 设置默认 registry 为 docker.io
   virtualisation.containers.registries.settings.unqualified-search-registries = [ "docker.io" ];
 
   # Configure keymap in X11
@@ -256,7 +263,7 @@
             </edit>
           </match>
 
-          <!-- Plasma/应用硬编码请求 Noto Sans 时也改用 MiSans，缺字自动回落 -->
+          <!-- Plasma/应用硬编码请求 Noto Sans 时也改用 MiSans，缺字自动回退 -->
           <match target="pattern">
             <test name="family">
               <string>Noto Sans</string>
