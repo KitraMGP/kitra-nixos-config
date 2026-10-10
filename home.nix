@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   home.username = "kitra";
@@ -30,5 +30,14 @@
   xdg.dataFile."fcitx5/rime/default.custom.yaml".text = ''
     patch:
       __include: rime_ice_suggestion:/
+  '';
+
+  # 开机进入桌面自动开启数字锁定：KWin 会话启动时读取 kcminputrc 的
+  # [Keyboard] NumLock（0=开启，1=关闭，2=保持不变）
+  # 用 kwriteconfig6 合并写入而非声明整个文件：kcminputrc 里还有 KDE 自己管理的
+  # 触控板等设置（[Libinput]），整文件交给 home-manager 会变成只读符号链接，
+  # 导致 KDE 无法再保存这些设置。
+  home.activation.numLockOn = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${pkgs.kdePackages.kconfig}/bin/kwriteconfig6 --file kcminputrc --group Keyboard --key NumLock 0
   '';
 }
