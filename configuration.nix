@@ -196,6 +196,18 @@
     htop
     btop
     podman-compose
+    # C/C++ 工具链：gcc 含 g++，另配 binutils(as/ld/ar 等)、gdb、make、cmake
+    gcc
+    binutils
+    gdb
+    gnumake
+    cmake
+    # Rust：用 nixpkgs 的 rustc/cargo（rustup 的预编译工具链在无 nix-ld 时无法运行）
+    rustc
+    cargo
+    # Node.js 与 pnpm
+    nodejs
+    pnpm
     vscode
     vlc
     qq
