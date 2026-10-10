@@ -34,6 +34,39 @@
   # 使用 CachyOS 内核（由 flake 输入 chaotic 提供）
   boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
+  # —— 内存与交换 ——
+  # 磁盘交换文件（ext4 根分区），在 zram 用尽后兜底
+  swapDevices = [
+    { device = "/swapfile"; size = 24 * 1024; priority = 10; } # size 单位 MiB
+  ];
+
+  # zram 压缩内存交换（zstd），优先于磁盘 swap 使用
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50;
+    priority = 100;
+  };
+
+  # 已用 zram 时关闭 zswap，避免交换页被二次压缩
+  boot.kernelParams = [ "zswap.enabled=0" ];
+
+  boot.kernel.sysctl = {
+    # zram 命中代价低，积极换出匿名页以保住文件缓存
+    "vm.swappiness" = 100;
+    # zram/SSD 上交换预读无收益
+    "vm.page-cluster" = 0;
+    # 保留目录项/索引节点缓存
+    "vm.vfs_cache_pressure" = 50;
+  };
+
+  # 内存接近耗尽时提前终止最大进程，避免整机卡死
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 10;   # 剩余内存低于 10% 时介入
+    freeSwapThreshold = 10;
+  };
+
   networking.hostName = "kitra-laptop-nix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
