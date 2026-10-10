@@ -216,6 +216,9 @@
     packages = with pkgs; [
       (callPackage ./misans.nix { })
       (callPackage ./sarasa-term-sc-nerd.nix { })
+      # Windows 简体中文原版字体：宋体/新宋体、黑体、楷体、仿宋、微软雅黑
+      # Nixpkgs 不收录（微软/中易许可禁止再分发），自定义 derivation，unfree
+      (callPackage ./windows-zh-fonts.nix { })
       noto-fonts # 拉丁字母后备
       noto-fonts-cjk-sans # 汉字缺字时后备
       noto-fonts-color-emoji # emoji
@@ -297,6 +300,8 @@
     vlc
     qq
     wechat
+    # WPS Office 中国版（含 WPS 文字/表格/演示/PDF），unfree，依赖全局 allowUnfree
+    wpsoffice-cn
   ];
 
   environment.sessionVariables = {
