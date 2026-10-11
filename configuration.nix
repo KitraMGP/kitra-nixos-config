@@ -124,6 +124,9 @@
   # You can disable this if you're only using the Wayland session.
   services.xserver.enable = true;
 
+  # xserver 模块默认会把 xterm 装进系统，这里排除掉
+  services.xserver.excludePackages = [ pkgs.xterm ];
+
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
