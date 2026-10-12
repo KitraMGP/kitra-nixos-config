@@ -65,6 +65,8 @@
     "vm.page-cluster" = 0;
     # 保留目录项/索引节点缓存
     "vm.vfs_cache_pressure" = 50;
+    # 启用 SysRq 快捷键
+    "kernel.sysrq" = 1;
   };
 
   # 内存接近耗尽时提前终止最大进程，避免整机卡死
