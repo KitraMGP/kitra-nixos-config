@@ -213,7 +213,7 @@
     shell = pkgs.zsh;
     extraGroups = [ "networkmanager" "wheel" "podman" ];
     packages = with pkgs; [
-      kdePackages.kate
+      # kdePackages.kate
     #  thunderbird
     ];
   };
@@ -317,6 +317,9 @@
     # WPS Office 中国版（含 WPS 文字/表格/演示/PDF），unfree，依赖全局 allowUnfree
     wpsoffice-cn
     wemeet
+    # KDE 软件
+    kdePackages.kate
+    kdePackages.kcalc
   ];
 
   environment.sessionVariables = {
