@@ -12,6 +12,19 @@
     package = null;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
+    # nix 拉取 github: 输入（flake inputs）走 api.github.com，未认证限额 60 次/小时，
+    # 重建系统时很容易耗尽。这里启动 shell 时调用 gh auth token 拿登录令牌，注入 nix 的
+    # access-tokens 设置（nix.conf 不支持执行命令，NIX_CONFIG 环境变量是官方给的注入点）。
+    # 令牌只存在于本 shell 的环境变量里，不写入任何文件。
+    initContent = ''
+      if (( $+commands[gh] )); then
+        _nix_gh_token="$(gh auth token 2>/dev/null)"
+        if [[ -n $_nix_gh_token ]]; then
+          export NIX_CONFIG="access-tokens = github.com=$_nix_gh_token"$'\n'"$NIX_CONFIG"
+        fi
+        unset _nix_gh_token
+      fi
+    '';
     oh-my-zsh = {
       enable = true;
       theme = "fishy";

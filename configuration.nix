@@ -18,6 +18,13 @@
     # "https://cache.nixos.org/" # 保留官方源作为备选
   ];
 
+  # home.nix 的 zsh 启动脚本会把 gh auth token 写进 NIX_CONFIG 供 nix 走 GitHub API 认证；
+  # sudo 默认只保留白名单环境变量，这里加进白名单，sudo nixos-rebuild 时 root 的 nix
+  # 也能带上令牌，不会触发 api.github.com 的 60 次/小时匿名限额。
+  security.sudo.extraConfig = ''
+    Defaults env_keep += "NIX_CONFIG"
+  '';
+
   boot.loader.systemd-boot.enable = false;
   
   # Use GRUB
@@ -26,6 +33,9 @@
     device = "nodev";
     efiSupport = true;
     useOSProber = true;
+    extraPrepareConfig = ''
+      export GRUB_OS_PROBER_SKIP_LIST="b0e4e8e7-d3c4-44fd-999b-e4050ade1a02"
+    '';
     # 不设置 font 会导致 fontSize 不生效
     font = "${pkgs.unifont}/share/fonts/opentype/unifont/unifont.otf";
     fontSize = 32;
@@ -36,6 +46,34 @@
   # GRUB 界面语言设为简体中文
   boot.loader.grub.extraConfig = ''
     set lang=zh_CN
+  '';
+
+  # 手工添加 Arch Linux 启动项。
+  # os-prober 自动探测到的 "Arch Linux" 项是坏的：Arch 与 NixOS 共用 ESP（两边
+  # fstab 都把 98EB-EA0C 挂在 /boot），os-prober 探测 Arch 根分区时会读到本机
+  # NixOS 生成的 /boot/grub/grub.cfg，把 NixOS 内核误当成 Arch 的启动项。
+  # Arch 内核/initramfs 由 Arch 的 mkinitcpio preset 放在 ESP 根目录
+  # （/etc/mkinitcpio.d/{linux,linux-cachyos}.preset）。
+  # CMDLINE 按要求：loglevel=3 quiet sysrq_always_enabled=1 zswap.enabled=0
+  # resume=UUID=b0e4e8e7-d3c4-44fd-999b-e4050ade1a02
+  boot.loader.grub.extraEntries = ''
+    menuentry "Arch Linux (manual)" {
+      insmod part_gpt
+      insmod fat
+      search --no-floppy --fs-uuid --set=root 98EB-EA0C
+
+      linux /vmlinuz-linux root=UUID=b0e4e8e7-d3c4-44fd-999b-e4050ade1a02 rw loglevel=3 quiet sysrq_always_enabled=1 zswap.enabled=0 resume=UUID=b0e4e8e7-d3c4-44fd-999b-e4050ade1a02
+      initrd /amd-ucode.img /initramfs-linux.img
+    }
+
+    menuentry "Arch Linux CachyOS Kernel (manual)" {
+      insmod part_gpt
+      insmod fat
+      search --no-floppy --fs-uuid --set=root 98EB-EA0C
+
+      linux /vmlinuz-linux-cachyos root=UUID=b0e4e8e7-d3c4-44fd-999b-e4050ade1a02 rw loglevel=3 quiet sysrq_always_enabled=1 zswap.enabled=0 resume=UUID=b0e4e8e7-d3c4-44fd-999b-e4050ade1a02
+      initrd /amd-ucode.img /initramfs-linux-cachyos.img
+    }
   '';
 
   # 使用 CachyOS 内核（由 flake 输入 chaotic 提供）
